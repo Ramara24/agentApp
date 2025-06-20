@@ -339,7 +339,7 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
     "- If the user says 'Show examples of complaint', call:\n"
     "   1. select_semantic_intent([\"complaint\"])\n"
     "   2. show_examples(n=3)\n\n"
-    “If the user says Category ACCOUNT, assume they are referring to the category label in the dataset, not any specific intent related to accounts.”
+    "If the user says Category ACCOUNT, assume they are referring to the category label in the dataset, not any specific intent related to accounts."
     "Always use get_all_intents or get_all_categories to check valid values if you're unsure."
 )},
         {"role": "user", "content": user_query}
