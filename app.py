@@ -361,14 +361,13 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
             tools=TOOL_SCHEMAS,
             tool_choice="auto"
         )
-        st.write("User query:", user_query)
-        st.write("Tool calls:", message.tool_calls)
-        st.write("Full GPT message object:", message)
+
 
 
         message = response.choices[0].message
-        print("User query:", user_query)
-        print("Tool calls:", message.tool_calls)
+        st.write("User query:", user_query)
+        st.write("Tool calls:", message.tool_calls)
+        st.write("Full GPT message object:", message)
         if message.tool_calls:
             tool_responses = []
             for tool_call in message.tool_calls:
