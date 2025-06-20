@@ -19,7 +19,6 @@ from dotenv import load_dotenv
     
 
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
-st.write("Key starts with:", OPENAI_API_KEY[:10])
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # --- Constants ---
@@ -336,11 +335,11 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
     "- If the user says 'How many refund requests did we get?', call:\n"
     "   1. select_semantic_intent([\"get_refund\"])\n"
     "   2. count()\n"
-    "- If the user says 'Show examples of complaint', call:\n"
-    "   1. select_semantic_intent([\"complaint\"])\n"
+    "- If the user says 'Show examples of Category ACCOUNT', call:\n"
+    "   1. select_semantic_category([\"ACCOUNT\"])\n"
     "   2. show_examples(n=3)\n\n"
-    "If the user says Category ACCOUNT, assume they are referring to the category label in the dataset, not any specific intent related to accounts."
-    "Always use get_all_intents or get_all_categories to check valid values if you're unsure."
+    "If the user says Category X, assume they are referring to the category label in the dataset, not any specific intent related to accounts."
+    " if you're unsure use get_all_intents or get_all_categories to check valid values first"
 )},
         {"role": "user", "content": user_query}
     ]
