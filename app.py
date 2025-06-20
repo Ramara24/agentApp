@@ -323,6 +323,32 @@ TOOL_SCHEMAS = [
     }
 ]
 
+import re
+
+def normalize_query(user_query: str, tools: CustomerServiceTools) -> str:
+    all_categories = tools.get_all_categories()
+    all_intents = tools.get_all_intents()
+
+    # Normalize: Show examples of Category X
+    def normalize_category(match):
+        cat = match.group(1).strip().upper()
+        if cat in all_categories:
+            return f"Category {cat}"
+        return match.group(0)  # return unchanged if not matched
+
+    # Normalize: Intent X
+    def normalize_intent(match):
+        intent = match.group(1).strip().lower()
+        if intent in all_intents:
+            return f"Intent {intent}"
+        return match.group(0)
+
+    # Apply only to explicit phrases
+    query = re.sub(r"[Cc]ategory\s+(\w+)", normalize_category, user_query)
+    query = re.sub(r"[Ii]ntent\s+(\w+)", normalize_intent, query)
+    return query
+
+
 # --- OpenAI Call ---
 def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
     messages = [
@@ -401,7 +427,7 @@ df = load_dataset_to_df()
 tools = CustomerServiceTools(df)
 
 st.title("📊 Customer Support Chatbot")
-st.write(f"Dataset stats: {len(df)} rows, {df['intent'].nunique()} intents, {df['category'].nunique()}")
+st.write(f"Dataset stats: {len(df)} rows, {df['intent'].nunique()} intents, {df['category'].nunique()} categories")
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
@@ -412,6 +438,7 @@ for role, msg in st.session_state.chat_history:
 
 if prompt:
     st.session_state.chat_history.append(("user", prompt))
+    normalized_prompt = normalize_query(prompt, tools)
     with st.spinner("Analyzing..."):
         reply = ask_openai_with_tools(prompt, tools)
     st.session_state.chat_history.append(("assistant", reply))
