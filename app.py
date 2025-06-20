@@ -333,27 +333,23 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
                 "related to customer service based on the dataset. Do not answer questions about public figures, unrelated topics, "
                 "or anything outside the dataset. If the question is irrelevant, use the `finish` tool.\n\n"
 
-                "You may call multiple tools in sequence if needed. When uncertain about values like category or intent, first call "
-                "`get_all_categories` or `get_all_intents` to verify valid options.\n\n"
-
                 "Structured question handling:\n"
-                "- For 'What are the most frequent categories?', call `get_top_categories(n=5)`.\n"
-                "- For 'What categories exist?', call `get_all_categories()`.\n"
-                "- For 'Show intent distributions', call `get_intent_distribution()`.\n"
-                "- For 'Show examples of Category X', call `select_semantic_category([\"X\"])` then `show_examples(n=3, category=\"X\")`.\n"
-                "- For 'Show examples of Intent Y', call `select_semantic_intent([\"Y\"])` then `show_examples(n=3, intent=\"Y\")`.\n"
-                "- For 'How many refund requests did we get?', assume the user means intent `get_refund`. "
-                "Call `select_semantic_intent([\"get_refund\"])` followed by `count_intent(intent=\"get_refund\")`.\n\n"
+                "- 'What are the most frequent categories?': get_top_categories(n=5)\n"
+                "- 'What categories exist?': get_all_categories()\n"
+                "- 'Show intent distributions': get_intent_distribution()\n"
+                "- 'Show examples of Category X': select_semantic_category([\"X\"]) → show_examples(n=3, category=\"X\")\n"
+                "- 'Show examples of Intent Y': select_semantic_intent([\"Y\"]) → show_examples(n=3, intent=\"Y\")\n"
+                "- 'How many refund requests did we get?': select_semantic_intent([\"get_refund\"]) → count_intent(\"get_refund\")\n\n"
 
-                "Notes:\n"
-                "- Always treat 'Category X' as a dataset category (uppercase), and 'Intent Y' as an intent (lowercase).\n"
-                "- 'Refund requests' refers to the intent `get_refund`. Normalize such common synonyms before calling tools.\n"
-                "- Do not guess; use get_all_intents or get_all_categories if you're not sure.\n"
-)},
+                "Rules:\n"
+                "- Treat 'Category X' as uppercase dataset category.\n"
+                "- Treat 'Intent Y' as lowercase dataset intent.\n"
+                "- Do not guess; use get_all_intents or get_all_categories to verify.\n"
+            )
+        },
         {"role": "user", "content": user_query}
     ]
 
-    
     try:
         response = client.chat.completions.create(
             model=MODEL_NAME,
@@ -362,20 +358,39 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
             tool_choice="auto"
         )
 
-
-
         message = response.choices[0].message
-        st.write("User query v2:", user_query)
+        st.write("User query:", user_query)
         st.write("Tool calls:", message.tool_calls)
         st.write("Full GPT message object:", message)
+
+        tool_responses = []
         if message.tool_calls:
-            tool_responses = []
             for tool_call in message.tool_calls:
-                tool_responses.append(run_tool(tool_call, tools))
-            return "\n\n".join(tool_responses)
-        return message.content or "No response generated"
+                name = tool_call.function.name
+                args = json.loads(tool_call.function.arguments)
+                st.write(f"Running tool: {name} with args: {args}")
+                result = run_tool(tool_call, tools)
+                tool_responses.append(result)
+
+                # 🧠 Manual chaining: follow up with another tool if needed
+                if name == "select_semantic_category":
+                    category = args["category_names"][0]
+                    examples = tools.show_examples(n=3, category=category)
+                    tool_responses.append(format_examples(examples))
+                elif name == "select_semantic_intent":
+                    intent = args["intent_names"][0]
+                    # Heuristic: if the question is about "how many", call count
+                    if "how many" in user_query.lower() or "number" in user_query.lower():
+                        count = tools.count_intent(intent)
+                        tool_responses.append(f"Count: {count} examples for intent '{intent}'")
+                    else:
+                        examples = tools.show_examples(n=3, intent=intent)
+                        tool_responses.append(format_examples(examples))
+
+        return "\n\n".join(tool_responses) or "No results"
     except Exception as e:
         return f"OpenAI call failed: {str(e)}"
+
 
 # --- Streamlit UI ---
 df = load_dataset_to_df()
