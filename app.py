@@ -382,9 +382,6 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
         )
 
         message = response.choices[0].message
-        st.write("User query:", user_query)
-        st.write("Tool calls:", message.tool_calls)
-        st.write("Full GPT message object:", message)
 
         tool_responses = []
         if message.tool_calls:
@@ -395,7 +392,7 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
                 result = run_tool(tool_call, tools)
                 tool_responses.append(result)
 
-                # 🧠 Manual chaining: follow up with another tool if needed
+
                 if name == "select_semantic_category":
                     category = args["category_names"][0]
                     examples = tools.show_examples(n=3, category=category)
