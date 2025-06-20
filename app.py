@@ -325,28 +325,22 @@ TOOL_SCHEMAS = [
 
 import re
 
-def normalize_query(user_query: str, tools: CustomerServiceTools) -> str:
-    query = user_query
+def normalize_query(query: str, tools: CustomerServiceTools) -> str:
+    # Normalize known category names (e.g., "order" → "ORDER")
+    for category in tools.get_all_categories():
+        pattern = rf"(category\s+){re.escape(category.lower())}\b"
+        query = re.sub(pattern, rf"\1{category}", query, flags=re.IGNORECASE)
 
-    # Normalize known intents and categories to correct casing
-    intents = tools.get_all_intents()
-    categories = tools.get_all_categories()
+    # Normalize known intent names (e.g., "intent GET_REFUND" → "intent get_refund")
+    for intent in tools.get_all_intents():
+        pattern = rf"(intent\s+){re.escape(intent.upper())}\b"
+        query = re.sub(pattern, rf"\1{intent}", query, flags=re.IGNORECASE)
 
-    # Normalize "Category X" → "Category <UPPERCASE X>"
-    for cat in categories:
-        if f"category {cat.lower()}" in query.lower():
-            query = re.sub(r"(category\s+)" + cat.lower(), r"\1" + cat.upper(), query, flags=re.IGNORECASE)
-
-    # Normalize "Intent Y" → "Intent <lowercase y>"
-    for intent in intents:
-        if f"intent {intent.upper()}" in query.upper():
-            query = re.sub(r"(intent\s+)" + intent.upper(), r"\1" + intent.lower(), query, flags=re.IGNORECASE)
-
-    # Heuristic synonym fix for "refund requests" → "get_refund"
-    if "refund request" in query.lower():
-        query = re.sub(r"refund requests?", "get_refund", query, flags=re.IGNORECASE)
+    # Normalize "refund request(s)" → "get_refund"
+    query = re.sub(r"\brefund requests?\b", "get_refund", query, flags=re.IGNORECASE)
 
     return query
+
 
 # --- OpenAI Call ---
 def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
