@@ -17,9 +17,9 @@ from dotenv import load_dotenv
 #    st.error("Missing OPENAI_API_KEY in environment variables")
 #    st.stop()
     
-import streamlit as st
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+st.write("Key starts with:", OPENAI_API_KEY[:10])
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # --- Constants ---
