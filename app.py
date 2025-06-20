@@ -388,7 +388,6 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
             for tool_call in message.tool_calls:
                 name = tool_call.function.name
                 args = json.loads(tool_call.function.arguments)
-                st.write(f"Running tool: {name} with args: {args}")
                 result = run_tool(tool_call, tools)
                 tool_responses.append(result)
 
