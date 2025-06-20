@@ -325,7 +325,6 @@ TOOL_SCHEMAS = [
 
 # --- OpenAI Call ---
 def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
-def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str: 
     messages = [
         {
             "role": "system",
