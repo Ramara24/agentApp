@@ -86,7 +86,7 @@ class CustomerServiceTools:
         text_block = "\n\n".join([f"Customer: {row['instruction']}\nAgent: {row['response']}" for _, row in context_df.iterrows()])
 
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": "You are a customer service analyst. Summarize the tone, common patterns, and key concerns based on the following conversations."},
                 {"role": "user", "content": text_block}
@@ -365,7 +365,7 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
 
 
         message = response.choices[0].message
-        st.write("User query:", user_query)
+        st.write("User query v2:", user_query)
         st.write("Tool calls:", message.tool_calls)
         st.write("Full GPT message object:", message)
         if message.tool_calls:
