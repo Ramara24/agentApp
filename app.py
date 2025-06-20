@@ -130,7 +130,7 @@ def run_tool(tool_call, tools: CustomerServiceTools) -> str:
             return f"Available categories:\n- " + "\n- ".join(categories)
         elif name == "select_semantic_intent":
             df = tools.select_semantic_intent(args['intent_names'])
-            return f"Found {len(df)} matches for intents: {', '.join(args['intent_names'])}"
+            return f"Selected rows for intents: {', '.join(args['intent_names'])}"
         elif name == "select_semantic_category":
             df = tools.select_semantic_category(args['category_names'])
             return f"Found {len(df)} matches for categories: {', '.join(args['category_names'])}"
