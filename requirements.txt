@@ -3,5 +3,4 @@ datasets
 pandas
 typing
 openai
-json
 dotenv
