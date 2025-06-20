@@ -172,7 +172,7 @@ TOOL_SCHEMAS = [
         "type": "function",
         "function": {
             "name": "select_semantic_intent",
-            "description": "Find matching intent names",
+            "description": "Find matching intent names. If followed by a count question, use count_intents",
             "parameters": {
                 "type": "object",
                 "properties": {
