@@ -341,6 +341,10 @@ def ask_openai_with_tools(user_query: str, tools: CustomerServiceTools) -> str:
                 "- 'Show examples of Intent Y': select_semantic_intent([\"Y\"]) → show_examples(n=3, intent=\"Y\")\n"
                 "- 'How many refund requests did we get?': select_semantic_intent([\"get_refund\"]) → count_intent(\"get_refund\")\n\n"
 
+                "unstructured question handling:\n"
+                "- For 'Summarize Category X', call `summarize(user_request=\"Summarize Category X\")`.\n"
+                "- For 'Summarize how agent respond to Intent Y', call `summarize(user_request=\"Summarize how agent respond to Intent Y\")`.\n"
+
                 "Rules:\n"
                 "- Treat 'Category X' as uppercase dataset category.\n"
                 "- Treat 'Intent Y' as lowercase dataset intent.\n"
